@@ -14,7 +14,8 @@ import Reminders from "./pages/Admin/Reminders";
 import Reports from "./pages/Admin/Reports";
 import RecordsDB from "./pages/Admin/RecordsDB";
 import Settings from "./pages/Admin/Settings";
-import Sales from "./pages/Admin/Analytics";
+
+import Analytics from "./pages/Admin/Analytics";
 
 const App = () => {
   return (
@@ -35,7 +36,7 @@ const App = () => {
                   <Route path="reminders" element={<Reminders />} />
                   <Route path="reports" element={<Reports />} />
                   <Route path="records-db" element={<RecordsDB />} />
-                  <Route path="sales" element={<Sales />} />
+                  <Route path="analytics" element={<Analytics />} />
                   <Route path="settings" element={<Settings />} />
                   {/* Default route */}
                   <Route path="*" element={<Dashboard />} />
