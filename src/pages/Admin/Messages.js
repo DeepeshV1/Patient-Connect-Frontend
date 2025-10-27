@@ -37,12 +37,10 @@ const Messages = () => {
 
   const messagesEndRef = useRef(null);
 
-  // Auto scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [selectedChat]);
 
-  // Handle send message
   const handleSend = () => {
     if (!messageText.trim() || !selectedChat) return;
 
@@ -68,7 +66,6 @@ const Messages = () => {
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Simulate typing indicator
   useEffect(() => {
     if (!selectedChat) return;
     const timeout = setTimeout(() => setTyping(false), 2000);
@@ -128,14 +125,12 @@ const Messages = () => {
                     : "border-gray-200"
                 }`}
               >
-                {/* Avatar */}
+                {/* 🧩 Avatar Image (Updated with your link) */}
                 <div className="relative">
-                  {/* 🖼️ Paste online image link below */}
-                  {/* Example: https://via.placeholder.com/48 */}
                   <img
-                    src="https://via.placeholder.com/48" // <-- replace with actual doctor/patient image URL
+                    src="https://processing.compress-or-die.com/storage/public/user-image/0lsq2aqanhfqoc988juqeuhgg7/0/Webppro_out_a9dcaa5725fe3a59c8c541dfadc01c86.webp?1694772771"
                     alt={chat.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-12 h-12 rounded-full object-cover border border-gray-300"
                   />
                   {chat.online && (
                     <span className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
@@ -171,6 +166,14 @@ const Messages = () => {
                 >
                   <FiArrowLeft size={20} />
                 </button>
+
+                {/* Profile picture in header */}
+                <img
+                  src="https://processing.compress-or-die.com/storage/public/user-image/0lsq2aqanhfqoc988juqeuhgg7/0/Jpgpro_out_f02a3274277cf2fdfd0a894c514b5fbf.jpg?1177810690"
+                  alt={selectedChat.name}
+                  className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                />
+
                 <div>
                   <h2 className="font-semibold">{selectedChat.name}</h2>
                   <p

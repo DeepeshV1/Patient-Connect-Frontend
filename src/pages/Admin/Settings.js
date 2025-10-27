@@ -36,11 +36,14 @@ export default function SettingsPage() {
     }
   });
 
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { accentColor, setAccentColor, darkMode, toggleDarkMode } = useTheme();
 
-  useEffect(() => {
-    localStorage.setItem("pc_settings", JSON.stringify(settings));
-  }, [settings]);
+
+useEffect(() => {
+  if (settings.theme.primaryColor !== accentColor) {
+    setAccentColor(settings.theme.primaryColor);
+  }
+}, [settings.theme.primaryColor]);
 
   useEffect(() => {
     document.documentElement.style.setProperty(

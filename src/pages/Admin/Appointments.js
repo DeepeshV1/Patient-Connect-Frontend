@@ -50,7 +50,7 @@ const Appointments = () => {
   });
 
   const eventStyleGetter = (event) => {
-    let bgColor = "#facc15"; // yellow (upcoming)
+    let bgColor = "#ffd013ff"; // yellow (upcoming)
     if (event.status === "finished") bgColor = "#22c55e"; // green
     if (event.status === "missed") bgColor = "#ef4444"; // red
     return {

@@ -1,138 +1,297 @@
-import React, { useState, useEffect } from "react";
+// src/components/admin/Navbar.js
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Bell, Sun, Moon, User } from "lucide-react";
+import { Search, Bell, Sun, Moon, User, Menu, X } from "lucide-react";
 import Fuse from "fuse.js";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 
-// 🟢 Paste your logo URL below 👇
-// const logoUrl = "https://your-image-link-here.png";
-const logoUrl = "https://img.icons8.com/fluency/48/stethoscope.png";
+// ✅ Replace with your logo
+const logoUrl = "https://i.ibb.co/YgFJMvx/patient-connect-logo.png";
 
-const Navbar = ({ allPages = [] }) => {
+const Navbar = ({ allPages = [], isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { darkMode, toggleDarkMode, accentColor } = useTheme();
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
 
-  const fuse = new Fuse(allPages, {
-    keys: ["title", "keywords", "patientName", "doctorName"],
-    threshold: 0.35, // better fuzzy match for small typos
+  // ✅ Augment search data with key categories & keywords
+  const fullSearchIndex = [
+    ...allPages,
+    {
+      title: "Dashboard Overview",
+      path: "/admin/dashboard",
+      category: "Analytics",
+      description: "View system overview, charts, and performance insights",
+      keywords: ["overview", "charts", "analytics", "stats", "data"],
+    },
+    {
+      title: "Patients Directory",
+      path: "/admin/patients",
+      category: "Patients",
+      description: "Manage patient profiles, appointments, and reports",
+      keywords: ["patients", "records", "appointments", "medical history"],
+    },
+    {
+      title: "Doctors",
+      path: "/admin/doctors",
+      category: "Doctors",
+      description: "View and manage doctor accounts and schedules",
+      keywords: ["doctors", "physicians", "consultants", "specialists"],
+    },
+    {
+      title: "Messages",
+      path: "/admin/messages",
+      category: "Communication",
+      description: "View patient-doctor chat history and send messages",
+      keywords: ["messages", "communication", "chat", "conversation"],
+    },
+    {
+      title: "Reminders",
+      path: "/admin/reminders",
+      category: "Notifications",
+      description: "Manage medication and appointment reminders",
+      keywords: ["reminder", "alerts", "notifications", "schedule"],
+    },
+    {
+      title: "Reports & Analytics",
+      path: "/admin/reports",
+      category: "Reports",
+      description: "Monitor doctor performance, patient visits, and sales",
+      keywords: ["analytics", "reports", "sales", "data", "insights"],
+    },
+    {
+      title: "Settings",
+      path: "/admin/settings",
+      category: "System",
+      description: "Change theme, accent color, and profile settings",
+      keywords: ["settings", "theme", "preferences", "profile", "color"],
+    },
+  ];
+
+  // ✅ Fuse.js setup for fuzzy intelligent search
+  const fuse = new Fuse(fullSearchIndex, {
+    keys: [
+      "title",
+      "keywords",
+      "description",
+      "category",
+      "tags",
+      "notes",
+      "doctorName",
+      "patientName",
+    ],
+    includeScore: true,
+    threshold: 0.3,
+    minMatchCharLength: 1,
+    ignoreLocation: true,
   });
 
+  // ✅ Hide results on outside click
   useEffect(() => {
-    if (query.trim() === "") {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ✅ Search trigger
+  useEffect(() => {
+    if (!query.trim()) {
       setResults([]);
+      setShowResults(false);
       return;
     }
     const searchResults = fuse.search(query);
     setResults(searchResults.map((r) => r.item));
+    setShowResults(true);
   }, [query]);
 
+  // ✅ Navigate & close results
   const handleResultClick = (path) => {
     navigate(path);
-    setShowResults(false);
     setQuery("");
+    setShowResults(false);
   };
 
   return (
     <nav
-      className={`sticky top-0 z-40 w-full backdrop-blur-lg transition-all duration-300 ${
-        darkMode ? "bg-gray-900/80 text-white" : "bg-white/80 text-gray-900"
-      } shadow`}
+      className={`fixed top-0 z-50 w-full backdrop-blur-md transition-all duration-500 shadow-sm border-b ${
+        darkMode
+          ? "bg-gray-900/70 border-gray-800 text-white"
+          : "bg-white/80 border-gray-200 text-gray-900"
+      }`}
+      style={{ "--accent": accentColor }}
     >
-      <div className="flex items-center justify-between px-4 md:px-6 py-3">
-        {/* Left Section: Logo */}
-        <div
-          onClick={() => navigate("/admin/dashboard")}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <img src={logoUrl} alt="logo" className="w-8 h-8" />
-          <span className="font-semibold text-lg hidden sm:block">
-            Patient-Connect
-          </span>
+      <div className="flex items-center justify-between px-3 sm:px-6 py-3">
+        {/* === LEFT SECTION === */}
+        <div className="flex items-center gap-3">
+          {/* Sidebar Toggle */}
+          <motion.button
+            onClick={toggleSidebar}
+            whileTap={{ scale: 0.9 }}
+            animate={{ rotate: isSidebarOpen ? 90 : 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative p-2 rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: darkMode ? "#1f2937" : "#f3f4f6",
+              color: accentColor,
+              boxShadow: isSidebarOpen
+                ? `0 0 10px 2px ${accentColor}80`
+                : `0 0 4px 1px ${accentColor}40`,
+            }}
+            title={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {isSidebarOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <X size={20} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="menu"
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Menu size={20} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
+
+          {/* Logo + Title */}
+          <div
+            onClick={() => navigate("/admin/dashboard")}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
+            <img
+              src={logoUrl}
+              alt="Patient-Connect"
+              className="w-8 h-8 rounded-full drop-shadow-md"
+              style={{
+                border: `2px solid ${accentColor}`,
+                boxShadow: `0 0 8px ${accentColor}60`,
+              }}
+            />
+            <span
+              className="font-semibold text-lg hidden sm:block transition-colors"
+              style={{
+                color: accentColor,
+                textShadow: `0 0 6px ${accentColor}40`,
+              }}
+            >
+              Patient-Connect
+            </span>
+          </div>
         </div>
 
-        {/* Middle Section: Search */}
-        <div className="relative flex-1 mx-4 max-w-xl">
+        {/* === SEARCH BAR === */}
+        <div ref={searchRef} className="relative flex-1 max-w-xl mx-4 hidden sm:flex">
           <div
-            className={`flex items-center rounded-full border transition-colors ${
-              darkMode
-                ? "bg-gray-800 border-gray-700 focus-within:border-blue-400"
-                : "bg-gray-100 border-gray-300 focus-within:border-blue-600"
-            }`}
+            className="flex items-center rounded-full border w-full transition-colors duration-300"
+            style={{
+              backgroundColor: darkMode ? "#1f2937" : "#f3f4f6",
+              borderColor: accentColor,
+              boxShadow: `0 0 8px ${accentColor}30`,
+            }}
           >
-            <Search className="ml-3 text-gray-400" size={18} />
+            <Search className="ml-3" size={18} style={{ color: accentColor }} />
             <input
               type="text"
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setShowResults(true);
-              }}
-              placeholder="Search across site, patients, or doctors..."
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search anything — patients, doctors, messages, analytics..."
               className={`w-full px-3 py-2 bg-transparent outline-none rounded-full text-sm ${
                 darkMode ? "text-white placeholder-gray-400" : "text-gray-900"
               }`}
             />
           </div>
 
-          {showResults && results.length > 0 && (
-            <div
-              className={`absolute mt-2 w-full rounded-lg shadow-lg overflow-hidden z-50 max-h-64 overflow-y-auto ${
-                darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
-              }`}
-            >
-              {results.map((res, i) => (
-                <div
-                  key={i}
-                  onClick={() => handleResultClick(res.path)}
-                  className={`px-4 py-2 cursor-pointer hover:${
-                    darkMode ? "bg-blue-500/30" : "bg-blue-100"
-                  }`}
-                >
-                  {res.title}
-                </div>
-              ))}
-            </div>
-          )}
+          {/* ✅ Search Results Dropdown */}
+          <AnimatePresence>
+            {showResults && results.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.2 }}
+                className={`absolute mt-2 w-full rounded-lg shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto ${
+                  darkMode ? "bg-gray-800" : "bg-white"
+                }`}
+              >
+                {results.map((res, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleResultClick(res.path)}
+                    className="px-4 py-2 cursor-pointer transition-all text-sm"
+                    style={{ color: accentColor }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        accentColor + "25")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "transparent")
+                    }
+                  >
+                    <p className="font-medium">{res.title}</p>
+                    {res.description && (
+                      <p
+                        className={`text-xs mt-0.5 ${
+                          darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        {res.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Right Section: Icons */}
+        {/* === RIGHT SECTION === */}
         <div className="flex items-center gap-3">
-          {/* Notification */}
           <button
-            className={`p-2 rounded-full transition ${
-              darkMode
-                ? "hover:bg-blue-500/30 text-gray-300"
-                : "hover:bg-blue-100 text-gray-700"
-            }`}
+            className="p-2 rounded-full transition"
+            style={{ color: accentColor }}
+            title="Notifications"
           >
             <Bell size={20} />
           </button>
 
-          {/* Theme Toggle */}
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-full transition ${
-              darkMode
-                ? "hover:bg-blue-500/30 text-yellow-300"
-                : "hover:bg-blue-100 text-blue-600"
-            }`}
+            className="p-2 rounded-full transition"
+            style={{
+              color: accentColor,
+              backgroundColor: darkMode ? "#1f2937" : "#f3f4f6",
+            }}
+            title="Toggle Theme"
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
-          {/* Profile */}
           <button
-            onClick={() => navigate("/admin/settings")}
-            className={`p-2 rounded-full transition ${
-              darkMode
-                ? "hover:bg-blue-500/30 text-gray-300"
-                : "hover:bg-blue-100 text-gray-700"
-            }`}
+            onClick={() => navigate("/admin/settings?tab=profile")}
+            className="p-2 rounded-full transition"
+            style={{ color: accentColor }}
+            title="Profile Settings"
           >
             <User size={20} />
           </button>
