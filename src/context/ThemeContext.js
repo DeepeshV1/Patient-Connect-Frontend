@@ -8,7 +8,7 @@ export const ThemeProvider = ({ children }) => {
   // 🌙 Dark mode state
   const [darkMode, setDarkMode] = useState(false);
   // 🎨 Accent color state
-  const [accentColor, setAccentColor] = useState("#2563eb");
+  const [accentColor, setAccentColor] = useState("#3dccb4ff");
 
   // ✅ Load saved preferences
   useEffect(() => {

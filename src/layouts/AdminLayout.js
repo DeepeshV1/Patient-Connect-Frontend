@@ -6,6 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { darkMode } = useTheme();
+  
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -20,6 +21,7 @@ const AdminLayout = ({ children }) => {
         isOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
         setIsOpen={setIsSidebarOpen}   // ✅ FIXED
+        
       />
 
       {/* Main Content */}
